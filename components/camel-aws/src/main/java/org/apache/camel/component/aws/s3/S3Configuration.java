@@ -39,6 +39,8 @@ public class S3Configuration implements Cloneable {
     private String policy;
     private String storageClass;
 
+    private String marker; // start offset marker
+
     public long getPartSize() {
         return partSize;
     }
@@ -150,5 +152,13 @@ public class S3Configuration implements Cloneable {
 
     public void setStorageClass(String storageClass) {
         this.storageClass = storageClass;
+    }
+
+    public String getMarker() {
+        return marker;
+    }
+
+    public void setMarker(String marker) {
+        this.marker = marker;
     }
 }

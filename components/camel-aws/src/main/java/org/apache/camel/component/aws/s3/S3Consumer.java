@@ -58,35 +58,57 @@ public class S3Consumer extends ScheduledBatchPollingConsumer {
         // must reset for each poll
         shutdownRunningTask = null;
         pendingExchanges = 0;
-        
+
         String fileName = getConfiguration().getFileName();
         String bucketName = getConfiguration().getBucketName();
         Queue<Exchange> exchanges = null;
 
         if (fileName != null) {
-            LOG.trace("Getting object in bucket [{}] with file name [{}]...", bucketName, fileName);
+            log.debug("S3 consumer - Getting object in bucket [{}] with file name [{}]...", bucketName, fileName);
 
             S3Object s3Object = getAmazonS3Client().getObject(new GetObjectRequest(bucketName, fileName));
             exchanges = createExchanges(s3Object);
         } else {
-            LOG.trace("Queueing objects in bucket [{}]...", bucketName);
-        
+            log.debug("S3 consumer - Queueing objects in bucket [{}], with prefix [{}]", bucketName, getConfiguration().getPrefix());
+
             ListObjectsRequest listObjectsRequest = new ListObjectsRequest();
             listObjectsRequest.setBucketName(bucketName);
             listObjectsRequest.setPrefix(getConfiguration().getPrefix());
             listObjectsRequest.setMaxKeys(maxMessagesPerPoll);
-        
+
+            log.debug("got start offset marker={}", this.getConfiguration().getMarker());
+            listObjectsRequest.setMarker(this.getConfiguration().getMarker());
             ObjectListing listObjects = getAmazonS3Client().listObjects(listObjectsRequest);
 
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Found {} objects in bucket [{}]...", listObjects.getObjectSummaries().size(), bucketName);
+            //////////// for debug ///////////
+            List<S3ObjectSummary> summeriesList = listObjects.getObjectSummaries();
+            if (summeriesList != null) {
+                int listSize = summeriesList.size();
+                log.debug(String.format("S3 consumer - got %d objects. marker=%s, next-marker=%s",
+                        listSize, listObjects.getMarker(), listObjects.getNextMarker()));
+                for (int i = 0; i < listSize; i++) {
+                    S3ObjectSummary s3ObjSummery = summeriesList.get(i);
+                    log.debug(String.format("S3 consumer - [%d] key:%s, eTag:%s", i, s3ObjSummery.getKey(), s3ObjSummery.getETag()));
+                }
             }
-        
-            exchanges = createExchanges(listObjects.getObjectSummaries());
+            //////////// for debug end ///////////
+
+            exchanges = createExchanges(listObjects);
+
+            if (listObjects.getNextMarker() != null) {
+                getConfiguration().setMarker(listObjects.getNextMarker());
+            } else {
+                // set the marker to the last available object
+                List<S3ObjectSummary> s3ObjectSummaries = listObjects.getObjectSummaries();
+                if (s3ObjectSummaries != null && s3ObjectSummaries.size() > 0) {
+                    S3ObjectSummary lastObj = s3ObjectSummaries.get(s3ObjectSummaries.size()-1);
+                    getConfiguration().setMarker(lastObj.getKey());
+                }
+            }
         }
         return processBatch(CastUtils.cast(exchanges));
     }
-    
+
     protected Queue<Exchange> createExchanges(S3Object s3Object) {
         Queue<Exchange> answer = new LinkedList<Exchange>();
         Exchange exchange = getEndpoint().createExchange(s3Object);
@@ -94,15 +116,17 @@ public class S3Consumer extends ScheduledBatchPollingConsumer {
         return answer;
     }
     
-    protected Queue<Exchange> createExchanges(List<S3ObjectSummary> s3ObjectSummaries) {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Received {} messages in this poll", s3ObjectSummaries.size());
-        }
+    protected Queue<Exchange> createExchanges(ObjectListing listObjects) {
+        List<S3ObjectSummary> s3ObjectSummaries = listObjects.getObjectSummaries();
+        log.debug("Received {} messages in this poll", s3ObjectSummaries.size());
+        String offsetMarker = listObjects.getMarker();
         
         Queue<Exchange> answer = new LinkedList<Exchange>();
         for (S3ObjectSummary s3ObjectSummary : s3ObjectSummaries) {
             S3Object s3Object = getAmazonS3Client().getObject(s3ObjectSummary.getBucketName(), s3ObjectSummary.getKey());
             Exchange exchange = getEndpoint().createExchange(s3Object);
+            // add the offset marker to the exchange
+            exchange.getIn().setHeader(S3Constants.OFFSET_MARKER, listObjects.getMarker());
             answer.add(exchange);
         }
 
