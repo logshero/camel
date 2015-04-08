@@ -80,19 +80,6 @@ public class S3Consumer extends ScheduledBatchPollingConsumer {
             listObjectsRequest.setMarker(this.getConfiguration().getMarker());
             ObjectListing listObjects = getAmazonS3Client().listObjects(listObjectsRequest);
 
-            //////////// for debug ///////////
-            List<S3ObjectSummary> summeriesList = listObjects.getObjectSummaries();
-            if (summeriesList != null) {
-                int listSize = summeriesList.size();
-                log.debug(String.format("S3 consumer - got %d objects. marker=%s, next-marker=%s",
-                        listSize, listObjects.getMarker(), listObjects.getNextMarker()));
-                for (int i = 0; i < listSize; i++) {
-                    S3ObjectSummary s3ObjSummery = summeriesList.get(i);
-                    log.debug(String.format("S3 consumer - [%d] key:%s, eTag:%s", i, s3ObjSummery.getKey(), s3ObjSummery.getETag()));
-                }
-            }
-            //////////// for debug end ///////////
-
             exchanges = createExchanges(listObjects);
 
             if (listObjects.getNextMarker() != null) {
@@ -118,7 +105,7 @@ public class S3Consumer extends ScheduledBatchPollingConsumer {
     
     protected Queue<Exchange> createExchanges(ObjectListing listObjects) {
         List<S3ObjectSummary> s3ObjectSummaries = listObjects.getObjectSummaries();
-        log.debug("Received {} messages in this poll", s3ObjectSummaries.size());
+        log.info("Received {} messages in this poll", s3ObjectSummaries.size());
         String offsetMarker = listObjects.getMarker();
         
         Queue<Exchange> answer = new LinkedList<Exchange>();

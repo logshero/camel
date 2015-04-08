@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class S3Endpoint extends ScheduledPollEndpoint {
-
+    protected final Logger log = LoggerFactory.getLogger(getClass());
     private static final Logger LOG = LoggerFactory.getLogger(S3Endpoint.class);
 
     private AmazonS3 s3Client;
@@ -91,15 +91,15 @@ public class S3Endpoint extends ScheduledPollEndpoint {
         String fileName = getConfiguration().getFileName();
 
         if (fileName != null) {
-            LOG.trace("File name [{}] requested, so skipping bucket check...", fileName);
+            log.debug("File name [{}] requested, so skipping bucket check...", fileName);
             return;
         }
 
         String bucketName = getConfiguration().getBucketName();
-        LOG.trace("Querying whether bucket [{}] already exists...", bucketName);
-        
+        log.debug("Querying whether bucket [{}] already exists...", bucketName);
+        log.debug("S3 client key:{}, secret:{}", getConfiguration().getAccessKey(), getConfiguration().getSecretKey());
         try {
-            s3Client.listObjects(new ListObjectsRequest(bucketName, null, null, null, 0));
+            s3Client.listObjects(new ListObjectsRequest(bucketName, getConfiguration().getPrefix(), getConfiguration().getMarker(), null, 0));
             LOG.trace("Bucket [{}] already exists", bucketName);
             return;
         } catch (AmazonServiceException ase) {
