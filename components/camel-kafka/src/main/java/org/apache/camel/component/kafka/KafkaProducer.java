@@ -16,6 +16,9 @@
  */
 package org.apache.camel.component.kafka;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Properties;
 
 import kafka.javaapi.producer.Producer;
@@ -72,10 +75,19 @@ public class KafkaProducer extends DefaultProducer {
             throw new CamelExchangeException("No topic key set", exchange);
         }
 
-        String msg = exchange.getIn().getBody(String.class);
+        Object body = exchange.getIn().getBody();
+        if (body instanceof Collection) {
+            List<KeyedMessage<String, String>> msgsData = new ArrayList<>();
+            for (String msg : (Collection<String>)body) {
+                msgsData.add(new KeyedMessage<String, String>(topic, partitionKey.toString(), msg));
+            }
+            producer.send(msgsData);
+        } else {
+            String msg = (String) body;
+            KeyedMessage<String, String> data = new KeyedMessage<String, String>(topic, partitionKey.toString(), msg);
+            producer.send(data);
+        }
 
-        KeyedMessage<String, String> data = new KeyedMessage<String, String>(topic, partitionKey.toString(), msg);
-        producer.send(data);
     }
 
 }
