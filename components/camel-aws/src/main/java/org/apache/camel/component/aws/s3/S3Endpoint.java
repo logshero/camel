@@ -17,6 +17,7 @@
 package org.apache.camel.component.aws.s3;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
@@ -184,7 +185,10 @@ public class S3Endpoint extends ScheduledPollEndpoint {
      */
     AmazonS3 createS3Client() {
         AWSCredentials credentials = new BasicAWSCredentials(configuration.getAccessKey(), configuration.getSecretKey());
-        AmazonS3 client = new AmazonS3Client(credentials);
+        ClientConfiguration clientConfiguration = new ClientConfiguration();
+        clientConfiguration.setMaxConnections(configuration.getMaxConnections());
+        log.info("creating S3 client with the following config:{}", configuration);
+        AmazonS3 client = new AmazonS3Client(credentials, clientConfiguration);
         return client;
     }
 

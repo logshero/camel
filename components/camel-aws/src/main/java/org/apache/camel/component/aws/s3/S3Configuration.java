@@ -40,6 +40,7 @@ public class S3Configuration implements Cloneable {
     private String storageClass;
 
     private String marker; // start offset marker
+    private int maxConnections;
 
     public long getPartSize() {
         return partSize;
@@ -160,5 +161,34 @@ public class S3Configuration implements Cloneable {
 
     public void setMarker(String marker) {
         this.marker = marker;
+    }
+
+    public int getMaxConnections() {
+        return maxConnections;
+    }
+
+    public void setMaxConnections(int maxConnections) {
+        this.maxConnections = maxConnections;
+    }
+
+    @Override
+    public String toString() {
+        return "S3Configuration{" +
+                "accessKey='" + accessKey + '\'' +
+                ", amazonS3Client=" + amazonS3Client +
+                ", bucketName='" + bucketName + '\'' +
+                ", fileName='" + fileName + '\'' +
+                ", prefix='" + prefix + '\'' +
+                ", region='" + region + '\'' +
+                ", deleteAfterRead=" + deleteAfterRead +
+                ", deleteAfterWrite=" + deleteAfterWrite +
+                ", multiPartUpload=" + multiPartUpload +
+                ", partSize=" + partSize +
+                ", amazonS3Endpoint='" + amazonS3Endpoint + '\'' +
+                ", policy='" + policy + '\'' +
+                ", storageClass='" + storageClass + '\'' +
+                ", marker='" + marker + '\'' +
+                ", maxConnections=" + maxConnections +
+                '}';
     }
 }
