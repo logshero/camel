@@ -105,7 +105,8 @@ public class S3Consumer extends ScheduledBatchPollingConsumer {
     
     protected Queue<Exchange> createExchanges(ObjectListing listObjects) {
         List<S3ObjectSummary> s3ObjectSummaries = listObjects.getObjectSummaries();
-        log.info("Received {} messages in this poll for {}", s3ObjectSummaries.size(), getEndpoint().getConfiguration().getBucketName());
+        log.info("Received " + s3ObjectSummaries.size() + " messages in this poll for "
+                + getEndpoint().getConfiguration().getBucketName() + " with prefix " + getEndpoint().getConfiguration().getPrefix());
         String offsetMarker = listObjects.getMarker();
         
         Queue<Exchange> answer = new LinkedList<Exchange>();
