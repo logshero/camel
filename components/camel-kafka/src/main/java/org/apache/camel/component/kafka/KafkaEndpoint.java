@@ -16,9 +16,6 @@
  */
 package org.apache.camel.component.kafka;
 
-import java.net.URISyntaxException;
-import java.util.concurrent.ExecutorService;
-
 import kafka.message.MessageAndMetadata;
 import org.apache.camel.Consumer;
 import org.apache.camel.Exchange;
@@ -28,6 +25,9 @@ import org.apache.camel.Producer;
 import org.apache.camel.impl.DefaultEndpoint;
 import org.apache.camel.impl.DefaultExchange;
 import org.apache.camel.impl.DefaultMessage;
+
+import java.net.URISyntaxException;
+import java.util.concurrent.ExecutorService;
 
 /**
  *
@@ -210,6 +210,9 @@ public class KafkaEndpoint extends DefaultEndpoint {
         configuration.setZookeeperConnectionTimeoutMs(zookeeperConnectionTimeoutMs);
     }
 
+    public void setPartitionAssignmentStrategy(String partitionAssignmentStrategy) {
+        configuration.setPartitionAssignmentStrategy(partitionAssignmentStrategy);
+    }
     public void setMessageSendMaxRetries(int messageSendMaxRetries) {
         configuration.setMessageSendMaxRetries(messageSendMaxRetries);
     }
@@ -450,4 +453,7 @@ public class KafkaEndpoint extends DefaultEndpoint {
         return configuration.getRequestTimeoutMs();
     }
 
+    public String getPartitionAssignmentStrategy() {
+        return configuration.getPartitionAssignmentStrategy();
+    }
 }

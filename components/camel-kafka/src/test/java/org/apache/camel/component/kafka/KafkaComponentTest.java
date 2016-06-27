@@ -16,12 +16,12 @@
  */
 package org.apache.camel.component.kafka;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.camel.CamelContext;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -39,7 +39,7 @@ public class KafkaComponentTest {
         params.put("consumerStreams", "3");
         params.put("topic", "mytopic");
         params.put("partitioner", "com.class.Party");
-
+        params.put("partitionAssignmentStrategy", "roundrobin");
         String uri = "kafka:broker1:12345,broker2:12566";
         String remaining = "broker1:12345,broker2:12566";
 
@@ -51,6 +51,7 @@ public class KafkaComponentTest {
         assertEquals("mytopic", endpoint.getTopic());
         assertEquals(3, endpoint.getConsumerStreams());
         assertEquals("com.class.Party", endpoint.getPartitioner());
+        assertEquals("roundrobin", endpoint.getPartitionAssignmentStrategy());
     }
 
     @Test

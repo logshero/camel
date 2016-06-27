@@ -16,9 +16,9 @@
  */
 package org.apache.camel.component.kafka;
 
-import java.util.Properties;
-
 import kafka.producer.DefaultPartitioner;
+
+import java.util.Properties;
 
 public class KafkaConfiguration {
     private String zookeeperConnect;
@@ -50,6 +50,7 @@ public class KafkaConfiguration {
     private Integer refreshLeaderBackoffMs;
     private String autoOffsetReset;
     private Integer consumerTimeoutMs;
+    private String partitionAssignmentStrategy;
 
     //Zookeepr configuration properties
     private Integer zookeeperSessionTimeoutMs;
@@ -122,6 +123,7 @@ public class KafkaConfiguration {
         addPropertyIfNotNull(props, "zookeeper.session.timeout.ms ", getZookeeperSessionTimeoutMs());
         addPropertyIfNotNull(props, "zookeeper.connection.timeout.ms", getZookeeperConnectionTimeoutMs());
         addPropertyIfNotNull(props, "zookeeper.sync.time.ms ", getZookeeperSyncTimeMs());
+        addPropertyIfNotNull(props, "partition.assignment.strategy", getPartitionAssignmentStrategy());
         return props;
     }
 
@@ -362,6 +364,14 @@ public class KafkaConfiguration {
 
     public Integer getZookeeperSyncTimeMs() {
         return zookeeperSyncTimeMs;
+    }
+
+    public void setPartitionAssignmentStrategy(String partitionAssignmentStrategy) {
+        this.partitionAssignmentStrategy = partitionAssignmentStrategy;
+    }
+
+    public String getPartitionAssignmentStrategy() {
+        return partitionAssignmentStrategy;
     }
 
     public void setZookeeperSyncTimeMs(Integer zookeeperSyncTimeMs) {

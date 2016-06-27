@@ -16,8 +16,6 @@
  */
 package org.apache.camel.component.netty4;
 
-import java.nio.channels.ClosedChannelException;
-
 import org.apache.camel.CamelExchangeException;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
@@ -26,6 +24,8 @@ import org.apache.camel.util.CamelLogger;
 import org.apache.camel.util.ObjectHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.nio.channels.ClosedChannelException;
 
 public class NettyConsumerExceptionHandler implements ExceptionHandler {
 
@@ -62,5 +62,4 @@ public class NettyConsumerExceptionHandler implements ExceptionHandler {
             // the logging exception handler must not cause new exceptions to occur
         }
     }
-
 }
